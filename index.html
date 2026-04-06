@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Lecture Proxy Manager</title>
+<style>
+/* ===== PREMIUM THEME - MATERIAL DESIGN ===== */
+:root {
+--bg-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+--surface: #ffffff;
+--surface-alt: #f8fafc;
+--text-primary: #1e293b;
+--text-secondary: #64748b;
+--border: #e2e8f0;
+--border-focus: #818cf8;
+--primary: #6366f1;
+--primary-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+--primary-hover: #4f46e5;
+--success: #10b981;
+--success-gradient: linear-gradient(135deg, #10b981, #22c55e);
+--danger: #ef4444;
+--danger-gradient: linear-gradient(135deg, #ef4444, #f97316);
+--warning: #f59e0b;
+--shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+--shadow: 0 4px 14px rgba(0,0,0,0.08);
+--shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+--shadow-glow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+--radius: 16px;
+--radius-lg: 24px;
+--radius-full: 9999px;
+--transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+--transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+background: var(--bg-gradient);
+color: var(--text-primary);
+min-height: 100vh;
+line-height: 1.45;
+-webkit-font-smoothing: antialiased;
+padding-bottom: env(safe-area-inset-bottom);
+}
+#app {
+max-width: 480px;
+margin: 0 auto;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+background: var(--surface);
+position: relative;
+padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+#app {
+min-height: auto;
+margin: 24px auto;
+border-radius: var(--radius-lg);
+box-shadow: var(--shadow-lg);
+max-height: 92vh;
+overflow: hidden;
+}
+body { display: flex; align-items: center; justify-content: center; padding: 24px; }
+}
+.header {
+padding: 20px 22px;
+background: var(--surface);
+border-bottom: 1px solid var(--border);
+display: flex;
+align-items: center;
+justify-content: center;
+position: relative;
+z-index: 20;
+}
+.header h1 {
+font-size: 1.25rem;
+font-weight: 700;
+letter-spacing: -0.025em;
+background: var(--primary-gradient);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+.back-btn {
+position: absolute;
+left: 16px;
+background: var(--surface-alt);
+border: 1px solid var(--border);
+border-radius: var(--radius-full);
+width: 38px;
+height: 38px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+cursor: pointer;
+transition: var(--transition);
+color: var(--text-primary);
+box-shadow: var(--shadow-sm);
+}
+.back-btn:hover { background: #f1f5f9; border-color: var(--border-focus); transform: scale(1.03); }
+.back-btn:active { transform: scale(0.97); }
+.back-btn.hidden { display: none; }
+
+.content { flex: 1; padding: 22px 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.screen { display: none; animation: slideUp 0.28s ease-out; }
+.screen.active { display: block; }
+@keyframes slideUp { from { opacity: 0.95; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Dashboard Cards */
+.dashboard { display: grid; gap: 16px; padding-top: 8px; }
+.action-card {
+background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+padding: 24px 22px; cursor: pointer; transition: var(--transition-slow);
+display: flex; align-items: center; gap: 18px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.action-card::before {
+content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+background: var(--primary-gradient); opacity: 0; transition: var(--transition);
+}
+.action-card.add::before { background: linear-gradient(135deg, #f59e0b, #f97316); }
+.action-card.view::before { background: linear-gradient(135deg, #3b82f6, #6366f1); }
+.action-card.free::before { background: var(--success-gradient); }
+.action-card.teachers::before { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+.action-card:hover { border-color: var(--border-focus); box-shadow: var(--shadow); transform: translateY(-2px); }
+.action-card:hover::before { opacity: 1; }
+.action-card:active { transform: translateY(0); }
+.action-icon {
+width: 56px; height: 56px; border-radius: 16px; display: flex;
+align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; position: relative;
+}
+.action-card.add .action-icon { background: linear-gradient(135deg, #fef3c7, #fcd34d); color: #b45309; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+.action-card.view .action-icon { background: linear-gradient(135deg, #dbeafe, #93c5fd); color: #1e40af; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); }
+.action-card.free .action-icon { background: linear-gradient(135deg, #d1fae5, #6ee7b7); color: #065f46; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
+.action-card.teachers .action-icon { background: linear-gradient(135deg, #ede9fe, #c4b5fd); color: #7c3aed; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2); }
+.action-content h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
+.action-content p { color: var(--text-secondary); font-size: 0.92rem; line-height: 1.4; }
+
+/* Forms */
+.form { display: flex; flex-direction: column; gap: 18px; margin-top: 6px; }
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field label { font-size: 0.93rem; font-weight: 500; color: var(--text-primary); display: flex; align-items: center; gap: 5px; }
+.field label .req { color: var(--danger); font-weight: 600; }
+.field input, .field select {
+padding: 15px 17px; border: 1.5px solid var(--border); border-radius: 13px;
+font-size: 1rem; background: var(--surface-alt); transition: var(--transition); width: 100%;
+}
+.field input:focus, .field select:focus {
+outline: none; border-color: var(--border-focus); background: var(--surface); box-shadow: var(--shadow-glow);
+}
+.field input::placeholder { color: var(--text-secondary); opacity: 0.85; }
+
+.form-actions { display: flex; gap: 12px; padding-top: 6px; margin-top: 4px; border-top: 1px solid var(--border); }
+.btn {
+padding: 14px 22px; border: none; border-radius: 13px; font-weight: 500; font-size: 0.96rem;
+cursor: pointer; transition: var(--transition); display: inline-flex;
+align-items: center; justify-content: center; gap: 6px; position: relative; overflow: hidden;
+}
+.btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.12); opacity: 0; transition: var(--transition); }
+.btn:active::after { opacity: 1; }
+.btn-primary { background: var(--primary-gradient); color: white; flex: 1; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35); }
+.btn-primary:hover { background: linear-gradient(135deg, var(--primary-hover), #7c3aed); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45); }
+.btn-primary:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3); }
+.btn-secondary { background: var(--surface-alt); color: var(--text-primary); border: 1.5px solid var(--border); }
+.btn-secondary:hover { background: #f1f5f9; border-color: var(--border-focus); }
+.btn-danger { background: var(--danger-gradient); color: white; }
+.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45); }
+.btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+.btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none !important; }
+.btn-large { padding: 18px 24px; font-size: 1.05rem; font-weight: 600; }
+
+/* Teachers List */
+.teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+.teacher-chip {
+background: #eef2ff; color: #3730a3; padding: 0.6rem 0.8rem;
+border-radius: var(--radius); font-size: 0.9rem; display: flex;
+justify-content: space-between; align-items: center; border: 1px solid #c7d2fe;
+}
+.remove-btn { background: transparent; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; padding: 0 0.3rem; }
+
+/* Schedule Table */
+.table-wrapper { overflow-x: auto; margin-top: 0.5rem; }
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+th, td { padding: 0.85rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+th { background: #f8fafc; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.75rem; }
+tr:hover { background: #f8fafc; }
+.badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 500; }
+.badge-day { background: #e5e7eb; }
+.badge-lect { background: #fef3c7; color: #92400e; }
+.badge-subj { background: #dbeafe; color: #1e40af; }
+.badge-class { background: #d1fae5; color: #065f46; }
+
+/* Schedule Cards (Mobile) */
+.schedule-list { display: none; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
+.sched-card {
+background: white; padding: 1rem; border-radius: var(--radius);
+border-left: 4px solid var(--primary); box-shadow: var(--shadow);
+display: flex; flex-direction: column; gap: 0.5rem;
+}
+.sched-header { display: flex; justify-content: space-between; align-items: center; }
+.sched-title { font-weight: 600; font-size: 1rem; }
+.sched-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); }
+.sched-actions { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
+
+/* Filter Bar */
+.filter-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: end; }
+.filter-bar select, .filter-bar input { flex: 1; min-width: 120px; }
+
+/* ===== FIND AVAILABLE - PREMIUM UI ===== */
+.free-search-card {
+background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+border: 2px solid #a7f3d0;
+border-radius: var(--radius-lg);
+padding: 24px 22px;
+margin-bottom: 20px;
+box-shadow: var(--shadow);
+}
+.free-search-card h3 {
+font-size: 1.05rem;
+font-weight: 600;
+color: #065f46;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.free-inputs {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
+margin-bottom: 16px;
+}
+.free-inputs .field label {
+color: #047857;
+font-weight: 600;
+}
+.free-inputs select, .free-inputs input {
+background: white;
+border-color: #a7f3d0;
+font-weight: 500;
+}
+.free-search-btn {
+width: 100%;
+background: var(--success-gradient);
+color: white;
+font-weight: 600;
+padding: 16px;
+border-radius: 13px;
+border: none;
+cursor: pointer;
+transition: var(--transition);
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+.free-search-btn:hover {
+background: linear-gradient(135deg, #059669, #16a34a);
+transform: translateY(-1px);
+box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+.free-search-btn:active { transform: translateY(1px); }
+.free-search-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* Results Header */
+.results-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 14px;
+padding-bottom: 12px;
+border-bottom: 1px solid var(--border);
+}
+.results-count {
+font-weight: 600;
+color: var(--text-primary);
+}
+.results-count span {
+background: var(--success-gradient);
+color: white;
+padding: 3px 10px;
+border-radius: 20px;
+font-size: 0.85rem;
+margin-left: 6px;
+}
+.clear-btn {
+background: transparent;
+border: 1.5px solid var(--border);
+color: var(--text-secondary);
+padding: 6px 14px;
+border-radius: 10px;
+font-size: 0.85rem;
+cursor: pointer;
+transition: var(--transition);
+}
+.clear-btn:hover { background: #f1f5f9; border-color: var(--border-focus); color: var(--text-primary); }
+
+/* Free Teacher Cards - PREMIUM */
+.free-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.free-card {
+background: white;
+border: 2px solid #a7f3d0;
+border-radius: var(--radius);
+padding: 18px 16px;
+text-align: center;
+transition: var(--transition-slow);
+position: relative;
+overflow: hidden;
+animation: cardPop 0.3s ease;
+}
+@keyframes cardPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.free-card::before {
+content: '';
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 4px;
+background: var(--success-gradient);
+}
+.free-card:hover {
+transform: translateY(-3px);
+box-shadow: var(--shadow-lg);
+border-color: #6ee7b7;
+}
+.free-avatar {
+width: 52px;
+height: 52px;
+border-radius: 50%;
+background: linear-gradient(135deg, #d1fae5, #6ee7b7);
+color: #065f46;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 1.1rem;
+margin: 0 auto 10px;
+box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+}
+.free-card h3 {
+font-size: 0.95rem;
+font-weight: 600;
+color: #065f46;
+margin-bottom: 4px;
+}
+.free-card .slot-info {
+font-size: 0.8rem;
+color: #047857;
+background: #ecfdf5;
+padding: 4px 10px;
+border-radius: 20px;
+display: inline-block;
+margin-bottom: 8px;
+}
+.free-card .action-hint {
+font-size: 0.75rem;
+color: var(--text-secondary);
+}
+
+/* Empty State - Premium */
+.empty-state {
+text-align: center;
+padding: 2.5rem 1.5rem;
+color: var(--text-secondary);
+display: none;
+background: var(--surface-alt);
+border-radius: var(--radius-lg);
+border: 2px dashed var(--border);
+}
+.empty-state.show { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.empty-state .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.6; display: block; }
+.empty-state h4 { font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
+.empty-state p { font-size: 0.9rem; line-height: 1.4; }
+
+/* Loading Overlay */
+.loading-overlay {
+position: fixed;
+inset: 0;
+background: rgba(255,255,255,0.92);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 5000;
+flex-direction: column;
+gap: 16px;
+}
+.loading-overlay.hidden { display: none; }
+.loading-spinner {
+width: 48px;
+height: 48px;
+border: 4px solid var(--border);
+border-top-color: var(--primary);
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-weight: 500; color: var(--text-secondary); }
+
+/* Toasts */
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; max-width: 320px; }
+.toast {
+background: var(--surface); border-left: 4px solid var(--primary); border-radius: 12px;
+padding: 14px 18px; box-shadow: var(--shadow-lg); display: flex;
+align-items: center; gap: 12px; animation: slideInToast 0.3s ease, fadeOutToast 0.3s ease 2.7s forwards; min-width: 280px;
+}
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+.toast.warning { border-left-color: var(--warning); }
+.toast-icon { font-size: 1.3rem; font-weight: 700; }
+.toast.success .toast-icon { color: var(--success); }
+.toast.error .toast-icon { color: var(--danger); }
+.toast.warning .toast-icon { color: var(--warning); }
+.toast-message { font-size: 0.93rem; color: var(--text-primary); flex: 1; }
+@keyframes slideInToast { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOutToast { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100px); } }
+
+/* Dialog */
+.dialog-overlay {
+position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+display: flex; align-items: center; justify-content: center; z-index: 3000; animation: fadeIn 0.2s ease;
+}
+.dialog {
+background: var(--surface); border-radius: var(--radius-lg); padding: 24px;
+max-width: 360px; width: 90%; box-shadow: var(--shadow-lg); text-align: center;
+}
+.dialog h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+.dialog p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 20px; }
+.dialog-actions { display: flex; gap: 12px; }
+.dialog-actions .btn { flex: 1; }
+
+/* Utilities */
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.mt-4 { margin-top: 16px; }
+.mb-4 { margin-bottom: 16px; }
+.text-muted { color: var(--text-secondary); }
+.text-sm { font-size: 0.89rem; }
+.font-medium { font-weight: 500; }
+
+/* Responsive */
+@media (max-width: 640px) {
+.table-wrapper { display: none !important; }
+.schedule-list { display: flex !important; }
+.form { grid-template-columns: 1fr !important; }
+.filter-bar { flex-wrap: nowrap; }
+.free-inputs { grid-template-columns: 1fr; }
+.free-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+@media (min-width: 641px) {
+.schedule-list { display: none !important; }
+.table-wrapper { display: block !important; }
+.form { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <button id="backBtn" class="back-btn hidden" aria-label="Go back">←</button>
+    <h1>📚 Lecture Proxy Manager</h1>
+  </header>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Syncing with cloud...</div>
+  </div>
+
+  <main class="content">
+    <!-- DASHBOARD -->
+    <section id="screen-dashboard" class="screen active">
+      <div class="dashboard">
+        <div class="action-card add" id="btnAdd" role="button" tabindex="0">
+          <div class="action-icon">✏️</div>
+          <div class="action-content"><h3>Add Schedule</h3><p>Assign teacher to class & subject</p></div>
+        </div>
+        <div class="action-card view" id="btnView" role="button" tabindex="0">
+          <div class="action-icon">📊</div>
+          <div class="action-content"><h3>View Data</h3><p>See all allocations with filters</p></div>
+        </div>
+        <div class="action-card free" id="btnFree" role="button" tabindex="0">
+          <div class="action-icon">🔍</div>
+          <div class="action-content"><h3>Find Available</h3><p>Get free teachers for a slot</p></div>
+        </div>
+        <div class="action-card teachers" id="btnTeachers" role="button" tabindex="0">
+          <div class="action-icon">👥</div>
+          <div class="action-content"><h3>Manage Teachers</h3><p>Add or remove teacher names</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEACHERS -->
+    <section id="screen-teachers" class="screen">
+      <div class="card">
+        <h2 style="font-size:1.1rem;margin-bottom:1rem;color:var(--text-primary);display:flex;align-items:center;gap:0.5rem;">👥 Manage Teachers</h2>
+        <div class="form" style="grid-template-columns:2fr 1fr;">
+          <div class="field">
+            <label for="teacherName">Teacher's Name <span class="req">*</span></label>
+            <input type="text" id="teacherName" placeholder="" autocomplete="off">
+          </div>
+          <div style="display:flex;align-items:end;">
+            <button class="btn btn-primary" id="addTeacherBtn" style="margin-bottom:0;">➕ Add</button>
+          </div>
+        </div>
+        <div class="teacher-grid" id="teacherList"></div>
+      </div>
+    </section>
+
+    <!-- ADD SCHEDULE -->
+    <section id="screen-add" class="screen">
+      <form id="scheduleForm" class="form">
+        <div class="field">
+          <label for="schedTeacher">Teacher <span class="req">*</span></label>
+          <select id="schedTeacher" required><option value="">Select Teacher</option></select>
+        </div>
+        <div class="field">
+          <label for="schedSubject">Subject <span class="req">*</span></label>
+          <input type="text" id="schedSubject" required placeholder="">
+        </div>
+        <div class="form" style="grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:-10px;">
+          <div class="field">
+            <label for="schedDay">Day <span class="req">*</span></label>
+            <select id="schedDay" required>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="schedLecture">Lecture No. <span class="req">*</span></label>
+            <input type="number" id="schedLecture" min="1" max="10" required placeholder="">
+          </div>
+        </div>
+        <div class="field" style="margin-top:-10px;">
+          <label for="schedClass">Class & Division <span class="req">*</span></label>
+          <input type="text" id="schedClass" required placeholder="">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelAdd">Cancel</button>
+          <button type="submit" class="btn btn-primary">💾 Save Allocation</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- VIEW SCHEDULE -->
+    <section id="screen-view" class="screen">
+      <div class="filter-bar">
+        <select id="filterDay">
+          <option value="All">All Days</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+        </select>
+        <input type="number" id="filterLecture" placeholder="Lecture No." min="1" max="10">
+        <button class="btn btn-secondary" id="clearFilters" style="min-width:90px;">Reset</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Teacher</th><th>Day</th><th>Lec</th><th>Subject</th><th>Class</th><th></th></tr></thead>
+          <tbody id="scheduleTableBody"></tbody>
+        </table>
+      </div>
+      <div class="schedule-list" id="scheduleCardList"></div>
+      <div id="viewEmpty" class="empty-state">
+        <div class="icon">📭</div>
+        <p>No allocations found. Add one from the Add Schedule tab.</p>
+      </div>
+    </section>
+
+    <!-- ===== FIND AVAILABLE - PREMIUM UI ===== -->
+    <section id="screen-free" class="screen">
+      
+      <!-- Search Card -->
+      <div class="free-search-card">
+        <h3>🔎 Find Available Teachers</h3>
+        <div class="free-inputs">
+          <div class="field">
+            <label for="freeDay">📅 Day</label>
+            <select id="freeDay">
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="freeLecture">🔢 Lecture No.</label>
+            <input type="number" id="freeLecture" min="1" max="10" value="1" placeholder="1-10">
+          </div>
+        </div>
+        <button class="free-search-btn" id="findFreeBtn">
+          <span>🔍</span> Search Available Teachers
+        </button>
+      </div>
+
+      <!-- Results Section -->
+      <div id="resultsSection" class="hidden">
+        <div class="results-header">
+          <div class="results-count">Available Teachers <span id="freeCount">0</span></div>
+          <button class="clear-btn" id="clearResults">Clear</button>
+        </div>
+        <div id="freeResults" class="free-grid"></div>
+      </div>
+
+      <!-- Empty States -->
+      <div id="freeEmpty" class="empty-state">
+        <div class="icon">👨‍🏫</div>
+        <h4>Select a time slot</h4>
+        <p>Choose a day and lecture number to find teachers who are free.</p>
+      </div>
+      
+      <div id="noTeachersEmpty" class="empty-state">
+        <div class="icon">⚠️</div>
+        <h4>No teachers added yet</h4>
+        <p>Go to <strong>Manage Teachers</strong> to add teacher names first.</p>
+      </div>
+      
+      <div id="allBusyEmpty" class="empty-state">
+        <div class="icon">📅</div>
+        <h4>All teachers are busy</h4>
+        <p>Every teacher has a class scheduled for this time slot.</p>
+      </div>
+
+    </section>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirmDialog" class="dialog-overlay hidden">
+    <div class="dialog">
+      <h3>⚠️ Delete?</h3>
+      <p id="confirmMessage">Are you sure you want to delete this?</p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
+        <button class="btn btn-danger" id="confirmDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Integration -->
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getFirestore, collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, where, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_nJUYN-kmzQNxXq7CorI2XzCLXEp2zRM",
+      authDomain: "lecture-manager-9979d.firebaseapp.com",
+      projectId: "lecture-manager-9979d",
+      storageBucket: "lecture-manager-9979d.firebasestorage.app",
+      messagingSenderId: "797182316017",
+      appId: "1:797182316017:web:c7c92babb26da7e0d94850"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ===== STATE =====
+    let state = { teachers: [], schedule: [] };
+    let unsubscribeTeachers = null;
+    let unsubscribeSchedule = null;
+
+    // ===== UTILS =====
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast ' + type;
+      const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠';
+      t.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function getInitials(name) {
+      return name.split(' ').map(n => n.trim()[0]).filter(c => c).slice(0, 2).join('').toUpperCase() || '?';
+    }
+
+    function showLoading(show) {
+      document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+    }
+
+    // ===== NAVIGATION =====
+    function show(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + screenId).classList.add('active');
+      const backBtn = document.getElementById('backBtn');
+      if (screenId === 'dashboard') {
+        backBtn.classList.add('hidden');
+      } else {
+        backBtn.classList.remove('hidden');
+        backBtn.onclick = () => show('dashboard');
+      }
+      document.querySelector('.content').scrollTop = 0;
+    }
+
+    // ===== FIRESTORE SYNC =====
+    async function syncTeachers() {
+      const teachersRef = collection(db, 'teachers');
+      
+      // Unsubscribe if already listening
+      if (unsubscribeTeachers) unsubscribeTeachers();
+      
+      // Real-time listener
+      unsubscribeTeachers = onSnapshot(teachersRef, (snapshot) => {
+        state.teachers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).map(t => t.name);
+        renderTeachers();
+        populateTeacherDropdown();
+      }, (error) => {
+        console.error('Teachers sync error:', error);
+        showToast('Failed to sync teachers', 'error');
+      });
+    }
+
+    async function syncSchedule() {
+      const scheduleRef = collection(db, 'schedules');
+      
+      if (unsubscribeSchedule) unsubscribeSchedule();
+      
+      unsubscribeSchedule = onSnapshot(scheduleRef, (snapshot) => {
+        state.schedule = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (document.getElementById('screen-view').classList.contains('active')) {
+          renderSchedule();
+        }
+      }, (error) => {
+        console.error('Schedule sync error:', error);
+        showToast('Failed to sync schedule', 'error');
+      });
+    }
+
+    // ===== TEACHERS =====
+    const teacherList = document.getElementById('teacherList');
+    const teacherSelect = document.getElementById('schedTeacher');
+
+    function renderTeachers() {
+      if (state.teachers.length === 0) {
+        teacherList.innerHTML = '<p class="text-muted text-sm" style="grid-column:1/-1">No teachers added yet</p>';
+        return;
+      }
+      teacherList.innerHTML = state.teachers.map((t, i) => `
+        <div class="teacher-chip">
+          <span>${t}</span>
+          <button class="remove-btn" data-name="${t}" aria-label="Remove">×</button>
+        </div>
+      `).join('');
+    }
+
+    function populateTeacherDropdown() {
+      teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+      state.teachers.forEach(t => {
+        teacherSelect.innerHTML += `<option value="${t}">${t}</option>`;
+      });
+    }
+
+    document.getElementById('addTeacherBtn').addEventListener('click', async () => {
+      const inp = document.getElementById('teacherName');
+      const name = inp.value.trim();
+      if (!name) return showToast('Please enter a teacher name', 'warning');
+      if (state.teachers.includes(name)) return showToast('Teacher already exists', 'warning');
+      
+      showLoading(true);
+      try {
+        await setDoc(doc(db, 'teachers', name), { name, createdAt: new Date().toISOString() });
+        inp.value = '';
+        showToast('✅ Teacher synced to cloud');
+      } catch (e) {
+        console.error('Add teacher error:', e);
+        showToast('Failed to add teacher: ' + e.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    });
+
+    teacherList.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('remove-btn')) {
+        const name = e.target.dataset.name;
+        confirmDialog(`Remove "${name}" from teachers?`, async () => {
+          showLoading(true);
+          try {
+            await deleteDoc(doc(db, 'teachers', name));
+            showToast('🗑️ Teacher removed');
+          } catch (err) {
+            showToast('Failed to remove: ' + err.message, 'error');
+          } finally {
+            showLoading(false);
+          }
+        });
+      }
+    });
+
+    // ===== SCHEDULE =====
+    const scheduleForm = document.getElementById('scheduleForm');
+
+    scheduleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const teacher = document.getElementById('schedTeacher').value;
+      const day = document.getElementById('schedDay').value;
+      const lecture = parseInt(document.getElementById('schedLecture').value);
+      const subject = document.getElementById('schedSubject').value.trim();
+      const classDiv = document.getElementById('schedClass').value.trim();
+
+      if (!teacher || !subject || !classDiv || isNaN(lecture)) return showToast('Please fill all fields', 'warning');
+      
+      // Check for conflicts in local state (Firestore syncs in real-time)
+      const conflict = state.schedule.find(s => s.teacher === teacher && s.day === day && s.lecture === lecture);
+      if (conflict) return showToast(`⚠️ ${teacher} already assigned L${lecture} on ${day}`, 'warning');
+
+      showLoading(true);
+      try {
+        const newRef = doc(collection(db, 'schedules'));
+        await setDoc(newRef, {
+          teacher, day, lecture, subject, classDiv,
+          createdAt: new Date().toISOString()
+        });
+        scheduleForm.reset();
+        showToast('✅ Allocation saved to cloud');
+      } catch (err) {
+        showToast('Failed to save: ' + err.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    });
+
+    function renderSchedule() {
+      const dayF = document.getElementById('filterDay').value;
+      const lecF = document.getElementById('filterLecture').value;
+      let data = state.schedule;
+      if (dayF !== 'All') data = data.filter(s => s.day === dayF);
+      if (lecF) data = data.filter(s => s.lecture === parseInt(lecF));
+
+      const tableBody = document.getElementById('scheduleTableBody');
+      const cardList = document.getElementById('scheduleCardList');
+      const empty = document.getElementById('viewEmpty');
+
+      if (data.length === 0) {
+        tableBody.innerHTML = '';
+        cardList.innerHTML = '';
+        empty.classList.add('show');
+        return;
+      }
+      empty.classList.remove('show');
+
+      tableBody.innerHTML = data.map(s => `
+        <tr>
+          <td><strong>${s.teacher}</strong></td>
+          <td><span class="badge badge-day">${s.day}</span></td>
+          <td><span class="badge badge-lect">L${s.lecture}</span></td>
+          <td><span class="badge badge-subj">${s.subject}</span></td>
+          <td><span class="badge badge-class">${s.classDiv}</span></td>
+          <td><button class="btn btn-danger btn-sm" data-id="${s.id}">🗑️</button></td>
+        </tr>
+      `).join('');
+
+      cardList.innerHTML = data.map(s => `
+        <div class="sched-card">
+          <div class="sched-header">
+            <span class="sched-title">${s.teacher}</span>
+            <span class="badge badge-lect">L${s.lecture}</span>
+          </div>
+          <div class="sched-meta">
+            <span>📅 ${s.day}</span><span>📖 ${s.subject}</span>
+            <span>🏫 ${s.classDiv}</span>
+          </div>
+          <div class="sched-actions">
+            <button class="btn btn-danger btn-sm" data-id="${s.id}">Remove</button>
+          </div>
+        </div>
+      `).join('');
+
+      // Attach delete handlers
+      document.querySelectorAll('#scheduleTableBody button[data-id], #scheduleCardList button[data-id]').forEach(btn => {
+        btn.onclick = (e) => {
+          const id = e.target.closest('button').dataset.id;
+          confirmDialog('Remove this allocation?', async () => {
+            showLoading(true);
+            try {
+              await deleteDoc(doc(db, 'schedules', id));
+              showToast('🗑️ Deleted from cloud');
+            } catch (err) {
+              showToast('Failed to delete: ' + err.message, 'error');
+            } finally {
+              showLoading(false);
+            }
+          });
+        };
+      });
+    }
+
+    document.getElementById('filterDay').addEventListener('change', renderSchedule);
+    document.getElementById('filterLecture').addEventListener('input', renderSchedule);
+    document.getElementById('clearFilters').addEventListener('click', () => {
+      document.getElementById('filterDay').value = 'All';
+      document.getElementById('filterLecture').value = '';
+      renderSchedule();
+    });
+
+    // ===== FIND AVAILABLE =====
+    function resetFreeSection() {
+      document.getElementById('resultsSection').classList.add('hidden');
+      document.getElementById('freeResults').innerHTML = '';
+      document.getElementById('freeCount').textContent = '0';
+      document.querySelectorAll('.empty-state').forEach(el => el.classList.remove('show'));
+      document.getElementById('freeEmpty').classList.add('show');
+    }
+
+    document.getElementById('findFreeBtn').addEventListener('click', () => {
+      const day = document.getElementById('freeDay').value;
+      const lect = parseInt(document.getElementById('freeLecture').value);
+      
+      if (!lect || lect < 1 || lect > 10) {
+        showToast('Enter valid lecture number (1-10)', 'warning');
+        document.getElementById('freeLecture').focus();
+        return;
+      }
+
+      if (state.teachers.length === 0) {
+        document.querySelectorAll('.empty-state').forEach(el => el.classList.remove('show'));
+        document.getElementById('noTeachersEmpty').classList.add('show');
+        document.getElementById('resultsSection').classList.add('hidden');
+        return;
+      }
+
+      const busy = new Set(
+        state.schedule
+          .filter(s => s.day === day && s.lecture === lect)
+          .map(s => s.teacher)
+      );
+      
+      const free = state.teachers.filter(t => !busy.has(t));
+
+      document.querySelectorAll('.empty-state').forEach(el => el.classList.remove('show'));
+      const resultsSection = document.getElementById('resultsSection');
+      const freeResults = document.getElementById('freeResults');
+      const freeCount = document.getElementById('freeCount');
+
+      if (free.length === 0) {
+        document.getElementById('allBusyEmpty').classList.add('show');
+        resultsSection.classList.add('hidden');
+        return;
+      }
+
+      resultsSection.classList.remove('hidden');
+      freeCount.textContent = free.length;
+      
+      freeResults.innerHTML = free.map(t => {
+        const initials = getInitials(t);
+        return `
+          <div class="free-card">
+            <div class="free-avatar">${initials}</div>
+            <h3>${t}</h3>
+            <div class="slot-info">📅 ${day} • L${lect}</div>
+            <div class="action-hint">✅ Available for proxy</div>
+          </div>
+        `;
+      }).join('');
+      
+      showToast(`Found ${free.length} available teacher${free.length > 1 ? 's' : ''}!`, 'success');
+    });
+
+    document.getElementById('clearResults').addEventListener('click', () => {
+      resetFreeSection();
+      showToast('Results cleared');
+    });
+
+    // ===== DIALOG =====
+    function confirmDialog(message, onConfirm, onCancel) {
+      document.getElementById('confirmMessage').textContent = message;
+      document.getElementById('confirmDialog').classList.remove('hidden');
+      const handleConfirm = () => {
+        document.getElementById('confirmDialog').classList.add('hidden');
+        onConfirm();
+      };
+      const handleCancel = () => {
+        document.getElementById('confirmDialog').classList.add('hidden');
+        if (onCancel) onCancel();
+      };
+      document.getElementById('confirmDelete').onclick = handleConfirm;
+      document.getElementById('confirmCancel').onclick = handleCancel;
+    }
+
+    // ===== NAVIGATION HANDLERS =====
+    document.getElementById('btnAdd').onclick = () => { populateTeacherDropdown(); show('add'); };
+    document.getElementById('btnView').onclick = () => { renderSchedule(); show('view'); };
+    document.getElementById('btnFree').onclick = () => { resetFreeSection(); show('free'); };
+    document.getElementById('btnTeachers').onclick = () => { renderTeachers(); show('teachers'); };
+    document.getElementById('backBtn').onclick = () => show('dashboard');
+    document.getElementById('cancelAdd').onclick = (e) => { e.preventDefault(); scheduleForm.reset(); show('dashboard'); };
+
+    // ===== INIT =====
+    (async function init() {
+      showLoading(true);
+      try {
+        await Promise.all([syncTeachers(), syncSchedule()]);
+        showToast('🚀 Connected to Firebase');
+      } catch (e) {
+        console.error('Init error:', e);
+        showToast('Connection issue - check console', 'error');
+      } finally {
+        showLoading(false);
+      }
+    })();
+
+    // Cleanup on unload
+    window.addEventListener('beforeunload', () => {
+      if (unsubscribeTeachers) unsubscribeTeachers();
+      if (unsubscribeSchedule) unsubscribeSchedule();
+    });
+  </script>
+</div>
+</body>
+</html>

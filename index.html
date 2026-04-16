@@ -4,103 +4,106 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Lecture Proxy Manager</title>
+<!-- PDF & ZIP Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <style>
 :root {
---bg-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
---surface: #ffffff;
---surface-alt: #f8fafc;
---text-primary: #1e293b;
---text-secondary: #64748b;
---border: #e2e8f0;
---border-focus: #818cf8;
---primary: #6366f1;
---primary-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
---primary-hover: #4f46e5;
---success: #10b981;
---success-gradient: linear-gradient(135deg, #10b981, #22c55e);
---danger: #ef4444;
---danger-gradient: linear-gradient(135deg, #ef4444, #f97316);
---warning: #f59e0b;
---yellow-bg: #fef3c7;
---yellow-text: #92400e;
---green-bg: #86efac;
---green-text: #166534;
---shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
---shadow: 0 4px 14px rgba(0,0,0,0.08);
---shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
---radius: 16px;
---radius-lg: 24px;
---radius-full: 9999px;
---transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --bg-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  --surface: #ffffff;
+  --surface-alt: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --border-focus: #818cf8;
+  --primary: #6366f1;
+  --primary-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --primary-hover: #4f46e5;
+  --success: #10b981;
+  --success-gradient: linear-gradient(135deg, #10b981, #22c55e);
+  --danger: #ef4444;
+  --danger-gradient: linear-gradient(135deg, #ef4444, #f97316);
+  --warning: #f59e0b;
+  --yellow-bg: #fef3c7;
+  --yellow-text: #92400e;
+  --green-bg: #86efac;
+  --green-text: #166534;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 14px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
-background: var(--bg-gradient);
-color: var(--text-primary);
-min-height: 100vh;
-line-height: 1.45;
--webkit-font-smoothing: antialiased;
-padding-bottom: env(safe-area-inset-bottom);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 #app {
-max-width: 100%;
-margin: 0 auto;
-min-height: 100vh;
-display: flex;
-flex-direction: column;
-background: var(--surface);
-position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  position: relative;
 }
 @media (min-width: 768px) {
-#app {
-max-width: 1000px;
-min-height: auto;
-margin: 24px auto;
-border-radius: var(--radius-lg);
-box-shadow: var(--shadow-lg);
-max-height: 95vh;
-overflow: hidden;
-}
-body { display: flex; align-items: center; justify-content: center; padding: 24px; }
+  #app {
+    max-width: 1000px;
+    min-height: auto;
+    margin: 24px auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-height: 95vh;
+    overflow: hidden;
+  }
+  body { display: flex; align-items: center; justify-content: center; padding: 24px; }
 }
 .header {
-padding: 20px 22px;
-background: var(--surface);
-border-bottom: 1px solid var(--border);
-display: flex;
-align-items: center;
-justify-content: center;
-position: relative;
-z-index: 20;
+  padding: 20px 22px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 20;
 }
 .header h1 {
-font-size: 1.25rem;
-font-weight: 700;
-background: var(--primary-gradient);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-background-clip: text;
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .back-btn {
-position: absolute;
-left: 16px;
-background: var(--surface-alt);
-border: 1px solid var(--border);
-border-radius: var(--radius-full);
-width: 38px;
-height: 38px;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 1.2rem;
-cursor: pointer;
-transition: var(--transition);
-color: var(--text-primary);
+  position: absolute;
+  left: 16px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-primary);
 }
 .back-btn:hover { background: #f1f5f9; transform: scale(1.03); }
 .back-btn.hidden { display: none; }
-
 .content { flex: 1; padding: 20px; overflow-y: auto; }
 .screen { display: none; animation: slideUp 0.28s ease-out; }
 .screen.active { display: block; }
@@ -108,14 +111,21 @@ color: var(--text-primary);
 
 .dashboard { display: grid; gap: 16px; }
 .action-card {
-background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-padding: 24px 22px; cursor: pointer; transition: var(--transition);
-display: flex; align-items: center; gap: 18px; box-shadow: var(--shadow-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 22px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: var(--shadow-sm);
 }
 .action-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: var(--border-focus); }
 .action-icon {
-width: 56px; height: 56px; border-radius: 16px; display: flex;
-align-items: center; justify-content: center; font-size: 1.6rem;
+  width: 56px; height: 56px; border-radius: 16px; display: flex;
+  align-items: center; justify-content: center; font-size: 1.6rem;
 }
 .action-card.add .action-icon { background: linear-gradient(135deg, #fef3c7, #fcd34d); color: #b45309; }
 .action-card.view .action-icon { background: linear-gradient(135deg, #dbeafe, #93c5fd); color: #1e40af; }
@@ -130,17 +140,30 @@ align-items: center; justify-content: center; font-size: 1.6rem;
 .field label { font-size: 0.93rem; font-weight: 500; color: var(--text-primary); }
 .field label .req { color: var(--danger); font-weight: 600; }
 .field input, .field select {
-padding: 15px 17px; border: 1.5px solid var(--border); border-radius: 13px;
-font-size: 1rem; background: var(--surface-alt); transition: var(--transition); width: 100%;
+  padding: 15px 17px;
+  border: 1.5px solid var(--border);
+  border-radius: 13px;
+  font-size: 1rem;
+  background: var(--surface-alt);
+  transition: var(--transition);
+  width: 100%;
 }
 .field input:focus, .field select:focus {
-outline: none; border-color: var(--border-focus); background: var(--surface);
+  outline: none; border-color: var(--border-focus); background: var(--surface);
 }
 .form-actions { display: flex; gap: 12px; padding-top: 6px; border-top: 1px solid var(--border); }
 .btn {
-padding: 14px 22px; border: none; border-radius: 13px; font-weight: 500; font-size: 0.96rem;
-cursor: pointer; transition: var(--transition); display: inline-flex;
-align-items: center; justify-content: center; gap: 6px;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 13px;
+  font-weight: 500;
+  font-size: 0.96rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .btn-primary { background: var(--primary-gradient); color: white; flex: 1; }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4); }
@@ -153,189 +176,160 @@ align-items: center; justify-content: center; gap: 6px;
 .btn-xs { padding: 4px 8px; font-size: 0.75rem; }
 .btn-full { width: 100%; }
 
-.search-box {
-position: relative;
-margin-bottom: 16px;
-}
+.search-box { position: relative; margin-bottom: 16px; }
 .search-box input {
-width: 100%;
-padding: 14px 17px 14px 45px;
-border: 1.5px solid var(--border);
-border-radius: 13px;
-font-size: 1rem;
-background: var(--surface-alt);
+  width: 100%;
+  padding: 14px 17px 14px 45px;
+  border: 1.5px solid var(--border);
+  border-radius: 13px;
+  font-size: 1rem;
+  background: var(--surface-alt);
 }
 .search-box::before {
-content: '🔍';
-position: absolute;
-left: 15px;
-top: 50%;
-transform: translateY(-50%);
+  content: '🔍';
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
 .teacher-chip {
-background: #eef2ff; color: #3730a3; padding: 0.6rem 0.8rem;
-border-radius: var(--radius); font-size: 0.9rem; display: flex;
-justify-content: space-between; align-items: center; border: 1px solid #c7d2fe;
-cursor: pointer;
+  background: #eef2ff; color: #3730a3; padding: 0.6rem 0.8rem;
+  border-radius: var(--radius); font-size: 0.9rem; display: flex;
+  justify-content: space-between; align-items: center; border: 1px solid #c7d2fe;
+  cursor: pointer;
 }
 .teacher-chip:hover { background: #e0e7ff; transform: translateY(-2px); box-shadow: var(--shadow); }
 .remove-btn { background: transparent; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; }
 
 .timetable-section {
-background: var(--surface);
-border: 2px solid var(--border);
-border-radius: var(--radius);
-padding: 20px;
-margin-top: 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
 }
 .period-controls {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 16px;
-padding-bottom: 12px;
-border-bottom: 2px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
 }
-.period-controls h3 {
-font-size: 1.1rem;
-font-weight: 600;
-color: var(--text-primary);
-}
-.period-buttons {
-display: flex;
-gap: 8px;
-}
+.period-controls h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
+.period-buttons { display: flex; gap: 8px; }
 .period-btn {
-width: 40px;
-height: 40px;
-border-radius: 10px;
-border: 2px solid var(--border);
-background: var(--surface);
-cursor: pointer;
-font-size: 1.3rem;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: var(--transition);
-font-weight: 600;
+  width: 40px; height: 40px; border-radius: 10px;
+  border: 2px solid var(--border); background: var(--surface);
+  cursor: pointer; font-size: 1.3rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); font-weight: 600;
 }
-.period-btn.add {
-border-color: var(--success);
-color: var(--success);
-}
+.period-btn.add { border-color: var(--success); color: var(--success); }
 .period-btn.add:hover { background: var(--success); color: white; }
-.period-btn.remove {
-border-color: var(--danger);
-color: var(--danger);
-}
+.period-btn.remove { border-color: var(--danger); color: var(--danger); }
 .period-btn.remove:hover { background: var(--danger); color: white; }
 
 .timetable-container { overflow-x: auto; }
-.timetable {
-width: 100%;
-border-collapse: collapse;
-min-width: 600px;
-}
+.timetable { width: 100%; border-collapse: collapse; min-width: 600px; }
 .timetable th, .timetable td {
-border: 1px solid var(--border);
-padding: 12px 8px;
-text-align: center;
-min-width: 100px;
+  border: 1px solid var(--border);
+  padding: 12px 8px;
+  text-align: center;
+  min-width: 100px;
 }
 .timetable th {
-background: var(--surface-alt);
-font-weight: 600;
-color: var(--text-primary);
-text-transform: uppercase;
-font-size: 0.9rem;
+  background: var(--surface-alt);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 0.9rem;
 }
 .timetable .period-col {
-background: var(--primary-gradient);
-color: white;
-font-weight: 700;
-width: 60px;
+  background: var(--primary-gradient);
+  color: white;
+  font-weight: 700;
+  width: 60px;
 }
 .timetable .day-header {
-background: linear-gradient(135deg, #667eea, #764ba2);
-color: white;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
 }
 .cell-content {
-display: flex;
-flex-direction: column;
-gap: 4px;
-min-height: 60px;
-cursor: pointer;
-transition: var(--transition);
-padding: 4px;
-border-radius: 6px;
-position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 60px;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 4px;
+  border-radius: 6px;
+  position: relative;
 }
 .cell-content:hover { background: #f0f9ff; }
 .cell-content.filled { background: #f0fdf4; }
 .subject-box {
-background: var(--yellow-bg);
-color: var(--yellow-text);
-padding: 6px 8px;
-border-radius: 6px;
-font-weight: 600;
-font-size: 0.85rem;
+  background: var(--yellow-bg);
+  color: var(--yellow-text);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 .class-box {
-background: var(--green-bg);
-color: var(--green-text);
-padding: 4px 8px;
-border-radius: 6px;
-font-weight: 600;
-font-size: 0.8rem;
+  background: var(--green-bg);
+  color: var(--green-text);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
 }
 .empty-cell { color: var(--text-secondary); font-size: 0.85rem; opacity: 0.6; }
 .edit-hint {
-font-size: 0.7rem;
-color: var(--text-secondary);
-margin-top: 4px;
-opacity: 0;
-transition: var(--transition);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  opacity: 0;
+  transition: var(--transition);
 }
 .cell-content:hover .edit-hint { opacity: 1; }
 .quick-edit-btn {
-position: absolute;
-top: 2px;
-right: 2px;
-background: var(--primary);
-color: white;
-border: none;
-border-radius: 4px;
-width: 20px;
-height: 20px;
-font-size: 0.7rem;
-cursor: pointer;
-opacity: 0;
-transition: var(--transition);
+  position: absolute;
+  top: 2px; right: 2px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 20px; height: 20px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition);
 }
 .cell-content:hover .quick-edit-btn { opacity: 1; }
 
 .modal-overlay {
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.5);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 3000;
-padding: 20px;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
 }
 .modal-overlay.active { display: flex; }
 .modal {
-background: var(--surface);
-border-radius: var(--radius-lg);
-padding: 24px;
-max-width: 400px;
-width: 100%;
-max-height: 90vh;
-overflow-y: auto;
-animation: slideUp 0.3s ease;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 95vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
 }
 .modal h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
@@ -344,146 +338,164 @@ animation: slideUp 0.3s ease;
 .filter-bar select, .filter-bar input { flex: 1; min-width: 120px; }
 
 .proxy-search-card {
-background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-border: 2px solid #a7f3d0;
-border-radius: var(--radius-lg);
-padding: 24px;
-margin-bottom: 20px;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 2px solid #a7f3d0;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
 }
 .proxy-search-card h3 {
-font-size: 1.05rem;
-font-weight: 600;
-color: #065f46;
-margin-bottom: 16px;
-display: flex;
-align-items: center;
-gap: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.proxy-controls {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 12px;
-margin-bottom: 16px;
-}
+.proxy-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 .proxy-search-btn {
-width: 100%;
-background: var(--success-gradient);
-color: white;
-font-weight: 600;
-padding: 16px;
-border-radius: 13px;
-border: none;
-cursor: pointer;
-transition: var(--transition);
+  width: 100%;
+  background: var(--success-gradient);
+  color: white;
+  font-weight: 600;
+  padding: 16px;
+  border-radius: 13px;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
 }
 .proxy-search-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
 
 .simple-proxy-row {
-background: var(--surface);
-border: 1px solid var(--border);
-margin-bottom: 8px;
-border-radius: 12px;
-overflow: hidden;
-transition: var(--transition);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: var(--transition);
 }
-.simple-proxy-row:hover {
-box-shadow: var(--shadow);
-border-color: var(--border-focus);
-}
+.simple-proxy-row:hover { box-shadow: var(--shadow); border-color: var(--border-focus); }
 .simple-proxy-cell {
-padding: 16px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-gap: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 .simple-proxy-cell:first-child { flex: 1; }
-.teacher-name {
-font-weight: 600;
-font-size: 1rem;
-color: var(--text-primary);
-}
+.teacher-name { font-weight: 600; font-size: 1rem; color: var(--text-primary); }
 .limited-warn {
-color: var(--danger);
-font-size: 0.75rem;
-font-weight: 600;
-margin-left: 8px;
-background: #fef2f2;
-padding: 2px 8px;
-border-radius: 12px;
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 8px;
+  background: #fef2f2;
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 .assign-proxy-btn {
-background: var(--primary-gradient);
-color: white;
-border: none;
-padding: 10px 20px;
-border-radius: 10px;
-cursor: pointer;
-font-size: 0.9rem;
-font-weight: 600;
-transition: var(--transition);
-white-space: nowrap;
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: var(--transition);
+  white-space: nowrap;
 }
-.assign-proxy-btn:hover {
-transform: translateY(-1px);
-box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
+.assign-proxy-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 
-.proxy-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 16px;
-}
-.proxy-title {
-display: flex;
-align-items: center;
-gap: 8px;
-font-weight: 600;
-color: #065f46;
-font-size: 1.05rem;
-}
+.proxy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.proxy-title { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #065f46; font-size: 1.05rem; }
 .free-count {
-background: var(--success);
-color: white;
-padding: 6px 16px;
-border-radius: 20px;
-font-size: 0.85rem;
-font-weight: 600;
+  background: var(--success);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-.proxy-list-card {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: var(--radius);
-padding: 16px;
-margin-bottom: 12px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-transition: var(--transition);
+/* ===== PROXY TABLE - Exact match to image ===== */
+.proxy-table-container {
+  overflow-x: auto;
 }
-.proxy-list-card:hover {
-box-shadow: var(--shadow);
-border-color: var(--border-focus);
+.proxy-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+  font-size: 0.95rem;
 }
-.proxy-info h4 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
-.proxy-info p { font-size: 0.85rem; color: var(--text-secondary); }
+.proxy-table th {
+  background: var(--surface-alt);
+  border: 1.5px solid var(--border);
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+.proxy-table td {
+  border: 1.5px solid var(--border);
+  padding: 10px 16px;
+  text-align: center;
+  color: var(--text-primary);
+}
+.proxy-table .lecture-no-col {
+  width: 120px;
+  font-weight: 600;
+}
+.proxy-table .class-col {
+  width: 100px;
+  font-weight: 600;
+}
+.proxy-table .teacher-col {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.proxy-table .sign-col {
+  width: 140px;
+  background: var(--surface-alt);
+}
+.proxy-table .absent-header-row td {
+  background: var(--surface-alt);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  text-align: center;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+}
+.proxy-table .empty-row td {
+  background: var(--surface-alt);
+  padding: 6px;
+  border: 1.5px solid var(--border);
+}
+.proxy-remove-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+.proxy-remove-btn:hover { background: #fef2f2; }
 
 .view-controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .view-select {
-padding: 12px 16px;
-border: 1.5px solid var(--border);
-border-radius: 10px;
-font-size: 0.95rem;
-background: var(--surface);
-min-width: 140px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: var(--surface);
+  min-width: 140px;
 }
-.view-table {
-width: 100%;
-border-collapse: collapse;
-min-width: 700px;
-}
+.view-table { width: 100%; border-collapse: collapse; min-width: 700px; }
 .view-table th, .view-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
 .view-table th { background: var(--primary-gradient); color: white; font-weight: 600; }
 .view-table .period-col { background: var(--surface-alt); font-weight: 700; width: 70px; }
@@ -494,44 +506,50 @@ min-width: 700px;
 .view-cell-class { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
 
 .empty-state {
-text-align: center;
-padding: 2.5rem 1.5rem;
-color: var(--text-secondary);
-display: none;
-background: var(--surface-alt);
-border-radius: var(--radius-lg);
-border: 2px dashed var(--border);
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: var(--text-secondary);
+  display: none;
+  background: var(--surface-alt);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border);
 }
 .empty-state.show { display: block; }
 .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
 
 .loading-overlay {
-position: fixed;
-inset: 0;
-background: rgba(255,255,255,0.92);
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 5000;
-flex-direction: column;
-gap: 16px;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+  flex-direction: column;
+  gap: 16px;
 }
 .loading-overlay.hidden { display: none; }
 .loading-spinner {
-width: 48px;
-height: 48px;
-border: 4px solid var(--border);
-border-top-color: var(--primary);
-border-radius: 50%;
-animation: spin 0.8s linear infinite;
+  width: 48px; height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 6000; display: flex; flex-direction: column; gap: 10px; }
 .toast {
-background: var(--surface); border-left: 4px solid var(--primary); border-radius: 12px;
-padding: 14px 18px; box-shadow: var(--shadow-lg); display: flex;
-align-items: center; gap: 12px; animation: slideIn 0.3s ease; min-width: 280px;
+  background: var(--surface);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideIn 0.3s ease;
+  min-width: 280px;
 }
 .toast.success { border-left-color: var(--success); }
 .toast.error { border-left-color: var(--danger); }
@@ -539,12 +557,21 @@ align-items: center; gap: 12px; animation: slideIn 0.3s ease; min-width: 280px;
 @keyframes slideIn { from { opacity: 0; transform: translateX(400px); } to { opacity: 1; transform: translateX(0); } }
 
 .dialog-overlay {
-position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-display: flex; align-items: center; justify-content: center; z-index: 3000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
 }
 .dialog {
-background: var(--surface); border-radius: var(--radius-lg); padding: 24px;
-max-width: 360px; width: 90%; text-align: center;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
 }
 .dialog h3 { margin-bottom: 8px; }
 .dialog p { color: var(--text-secondary); margin-bottom: 20px; }
@@ -554,12 +581,12 @@ max-width: 360px; width: 90%; text-align: center;
 .hidden { display: none !important; }
 
 @media (max-width: 640px) {
-.timetable th, .timetable td { padding: 8px 4px; font-size: 0.85rem; min-width: 80px; }
-.proxy-controls { grid-template-columns: 1fr; }
-.period-controls { flex-direction: column; gap: 12px; align-items: flex-start; }
-.view-table { min-width: 500px; }
-.proxy-list-card { flex-direction: column; gap: 12px; text-align: center; }
-.simple-proxy-cell { flex-direction: column; text-align: center; }
+  .timetable th, .timetable td { padding: 8px 4px; font-size: 0.85rem; min-width: 80px; }
+  .proxy-controls { grid-template-columns: 1fr; }
+  .period-controls { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .view-table { min-width: 500px; }
+  .proxy-table { min-width: 400px; font-size: 0.85rem; }
+  .proxy-table th, .proxy-table td { padding: 8px 10px; }
 }
 </style>
 </head>
@@ -576,6 +603,7 @@ max-width: 360px; width: 90%; text-align: center;
   </div>
 
   <main class="content">
+    <!-- Dashboard Screen -->
     <section id="screen-dashboard" class="screen active">
       <div class="dashboard">
         <div class="action-card teachers" onclick="show('teachers')">
@@ -594,9 +622,14 @@ max-width: 360px; width: 90%; text-align: center;
           <div class="action-icon">📋</div>
           <div class="action-content"><h3>View Proxies</h3><p>See assigned proxies</p></div>
         </div>
+        <div class="action-card" onclick="exportTimetablesZIP()" style="background: linear-gradient(135deg, #fef3c7, #fcd34d); border-color: #f59e0b;">
+          <div class="action-icon" style="background: linear-gradient(135deg, #fef3c7, #fcd34d); color: #b45309;">📦</div>
+          <div class="action-content"><h3>Download Timetables</h3><p>Export all teacher timetables as ZIP</p></div>
+        </div>
       </div>
     </section>
 
+    <!-- Teachers Screen -->
     <section id="screen-teachers" class="screen">
       <div class="form">
         <div class="field">
@@ -631,8 +664,7 @@ max-width: 360px; width: 90%; text-align: center;
       <div class="form-actions">
         <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
         <button class="btn btn-primary" onclick="saveTeacher()">💾 Save Teacher</button>
-      </div>
-      
+      </div>      
       <div style="margin-top: 24px;">
         <h3 style="margin-bottom: 12px; font-size: 1rem;">📋 All Teachers</h3>
         <div class="search-box">
@@ -642,6 +674,7 @@ max-width: 360px; width: 90%; text-align: center;
       </div>
     </section>
 
+    <!-- View Screen -->
     <section id="screen-view" class="screen">
       <div class="view-controls">
         <select class="view-select" id="viewTeacher"></select>
@@ -667,6 +700,7 @@ max-width: 360px; width: 90%; text-align: center;
       </div>
     </section>
 
+    <!-- Find Available Screen -->
     <section id="screen-free" class="screen">
       <div class="proxy-search-card">
         <h3>🔎 Find Available Teachers</h3>
@@ -697,8 +731,7 @@ max-width: 360px; width: 90%; text-align: center;
           <span class="free-count" id="freeCount">0 free</span>
         </div>
         <div id="proxyList"></div>
-      </div>
-      
+      </div>      
       <div id="proxyEmpty" class="empty-state show">
         <div class="icon">👨‍🏫</div>
         <p>Select day and period to find free teachers</p>
@@ -709,18 +742,35 @@ max-width: 360px; width: 90%; text-align: center;
       </div>
     </section>
 
+    <!-- Proxies Screen -->
     <section id="screen-proxies" class="screen">
-      <h2 style="font-size:1.2rem; margin-bottom:16px; color:var(--text-primary);">📋 All Assigned Proxies</h2>
-      <div id="allProxiesList"></div>
+      <h2 style="font-size:1.2rem; margin-bottom:16px; color:var(--text-primary);">📋 Today's Proxies</h2>
+      
+      <div class="proxy-table-container" id="proxyTableContainer">
+        <table class="proxy-table" id="proxyTable">
+          <thead>
+            <tr>
+              <th>Lecture no.</th>
+              <th>Class</th>
+              <th></th>
+              <th>Sign</th>
+            </tr>
+          </thead>
+          <tbody id="proxyTableBody">
+          </tbody>
+        </table>
+      </div>
+      
       <div id="noProxies" class="empty-state show">
         <div class="icon">📭</div>
-        <p>No proxy assignments found</p>
+        <p>No proxy assignments today</p>
       </div>
     </section>
   </main>
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Edit Schedule Modal -->
   <div id="editModal" class="modal-overlay">
     <div class="modal">
       <h3>✏️ Edit Schedule</h3>
@@ -739,13 +789,15 @@ max-width: 360px; width: 90%; text-align: center;
     </div>
   </div>
 
+  <!-- Assign Proxy Modal -->
   <div id="assignProxyModal" class="modal-overlay">
     <div class="modal">
       <h3>📋 Assign Proxy</h3>
       <div class="form">
-        <div class="field"><label>Teacher</label><input type="text" id="proxyTeacher" readonly></div>
+        <div class="field"><label>Substitute Teacher</label><input type="text" id="proxyTeacher" readonly></div>
         <div class="field"><label>Day</label><input type="text" id="proxyDay" readonly></div>
         <div class="field"><label>Period</label><input type="text" id="proxyPeriod" readonly></div>
+        <div class="field"><label>🚫 Absent Teacher Name <span class="req">*</span></label><input type="text" id="proxyAbsentTeacher" placeholder="e.g., Mr. Smith"></div>
         <div class="field"><label>Class <span class="req">*</span></label><input type="text" id="proxyClass" placeholder="e.g., 10"></div>
         <div class="field"><label>Division <span class="req">*</span></label><input type="text" id="proxyDivision" placeholder="e.g., A, B, C"></div>
       </div>
@@ -756,6 +808,7 @@ max-width: 360px; width: 90%; text-align: center;
     </div>
   </div>
 
+  <!-- Confirm Dialog -->
   <div id="confirmDialog" class="dialog-overlay hidden">
     <div class="dialog">
       <h3>⚠️ Confirm</h3>
@@ -796,9 +849,19 @@ max-width: 360px; width: 90%; text-align: center;
     let unsubscribers = [];
     let isEditingCell = false;
 
+    // ✅ FIXED: Correct HTML entity mapping for XSS prevention
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
-      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;', '/': '&#x2F;', '`': '&#x60;', '=': '&#x3D;' };
+      const map = { 
+        '&': '&amp;', 
+        '<': '&lt;', 
+        '>': '&gt;', 
+        '"': '&quot;', 
+        "'": '&#039;', 
+        '/': '&#x2F;', 
+        '`': '&#x60;', 
+        '=': '&#x3D;' 
+      };
       return String(str).replace(/[&<>"'`=\/]/g, m => map[m]);
     }
 
@@ -853,7 +916,6 @@ max-width: 360px; width: 90%; text-align: center;
           back.onclick = () => show('dashboard');
         }
       }
-      
       if (screen === 'view') renderViewTable();
       if (screen === 'free') resetProxy();
       if (screen === 'proxies') renderProxies();
@@ -1097,10 +1159,8 @@ max-width: 360px; width: 90%; text-align: center;
       }));
 
       unsubscribers.push(onSnapshot(collection(db, 'proxies'), snap => {
-        const today = getTodayStr();
-        state.proxies = snap.docs
-          .map(d => ({ id: d.id, ...d.data() }))
-          .filter(p => p.date === today);
+        state.proxies = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderProxies();
       }));
       
       syncPeriodCountFromFirestore();
@@ -1147,8 +1207,7 @@ max-width: 360px; width: 90%; text-align: center;
         if (!dialog || !confirmMsg || !confirmBtn) {
           resolve(window.confirm(message));
           return;
-        }
-        
+        }        
         confirmMsg.textContent = message;
         dialog.classList.remove('hidden');
         
@@ -1172,22 +1231,18 @@ max-width: 360px; width: 90%; text-align: center;
       });
     }
 
-    // 🔥 COMPLETE TEACHER DELETION FIX 🔥
     window.removeTeacher = async function(name) {
       if (!await showConfirm(`Remove ${name} and ALL associated data (schedules & proxies)?`)) return;
       showLoading(true);
       try {
-        // 1. Delete all schedules for this teacher
         const qSchedules = query(collection(db, 'schedules'), where('teacher', '==', name));
         const scheduleSnap = await getDocs(qSchedules);
         await Promise.all(scheduleSnap.docs.map(d => deleteDoc(d.ref)));
 
-        // 2. Delete all proxies for this teacher
         const qProxies = query(collection(db, 'proxies'), where('teacher', '==', name));
         const proxySnap = await getDocs(qProxies);
         await Promise.all(proxySnap.docs.map(d => deleteDoc(d.ref)));
 
-        // 3. Delete teacher document
         await deleteDoc(doc(db, 'teachers', name));
 
         showToast(`🗑️ ${name} and all data removed`);
@@ -1276,6 +1331,7 @@ max-width: 360px; width: 90%; text-align: center;
       if (daySelect) daySelect.addEventListener('change', renderViewTable);
     });
 
+    // ✅ UPDATED: Hide teachers with only 1 free lecture in a day
     window.findAvailable = function() {
       const targetDay = document.getElementById('freeDay')?.value || 'Monday';
       const period = parseInt(document.getElementById('freePeriod')?.value || 1);
@@ -1283,9 +1339,33 @@ max-width: 360px; width: 90%; text-align: center;
       if (state.teachers.length === 0) return showToast('No teachers added', 'warning');
 
       const freeTeachers = state.teachers.filter(teacher => {
-        const hasSchedule = state.schedule.some(s => s.teacher === teacher.name && s.day === targetDay && s.period === period);
-        const hasProxy = state.proxies.some(p => p.teacher === teacher.name);
-        return !hasSchedule && !hasProxy;
+        const hasSchedule = state.schedule.some(s => 
+          s.teacher === teacher.name && 
+          s.day === targetDay && 
+          s.period === period
+        );
+        const hasProxy = state.proxies.some(p => 
+          p.teacher === teacher.name && 
+          p.day === targetDay && 
+          p.period === period
+        );
+        
+        let totalFreePeriods = 0;
+        for (let p = 1; p <= state.periodCount; p++) {
+          const hasSched = state.schedule.some(s => 
+            s.teacher === teacher.name && 
+            s.day === targetDay && 
+            s.period === p
+          );
+          const hasPrx = state.proxies.some(pr => 
+            pr.teacher === teacher.name && 
+            pr.day === targetDay && 
+            pr.period === p
+          );
+          if (!hasSched && !hasPrx) totalFreePeriods++;
+        }
+        
+        return !hasSchedule && !hasProxy && totalFreePeriods > 1;
       });
 
       const proxyResults = document.getElementById('proxyResults');
@@ -1298,30 +1378,18 @@ max-width: 360px; width: 90%; text-align: center;
         if (noFreeTeachers) noFreeTeachers.classList.add('show');
         return;
       }
-
       const proxyList = document.getElementById('proxyList');
       if (!proxyList) return;
       
       proxyList.innerHTML = freeTeachers.map(t => {
         const safeName = escapeForAttr(t.name);
-        const totalPeriods = state.periodCount;
-        let freeCount = 0;
-        for (let p = 1; p <= totalPeriods; p++) {
-          const hasSchedule = state.schedule.some(s => s.teacher === t.name && s.day === targetDay && s.period === p);
-          const hasProxy = state.proxies.some(pr => pr.teacher === t.name && pr.period === p);
-          if (!hasSchedule && !hasProxy) freeCount++;
-        }
-        
-        const limitedWarn = freeCount === 1 ? '<span class="limited-warn">⚠️ Only 1 free lecture</span>' : '';
-        
         return `
           <div class="simple-proxy-row">
             <div class="simple-proxy-cell">
               <div>
                 <span class="teacher-name">${escapeHtml(t.name)}</span>
-                ${limitedWarn}
               </div>
-              <button class="assign-proxy-btn" onclick="openAssignProxy('${safeName}', '${escapeForAttr(targetDay)}', ${period})">📋 Assign Proxy</button>
+              <button class="assign-proxy-btn" onclick="openAssignProxy('${safeName}', '${escapeForAttr(targetDay)}', ${period})">📋 Assign</button>
             </div>
           </div>
         `;
@@ -1345,6 +1413,7 @@ max-width: 360px; width: 90%; text-align: center;
       document.getElementById('proxyTeacher').value = teacherName;
       document.getElementById('proxyDay').value = day;
       document.getElementById('proxyPeriod').value = period;
+      document.getElementById('proxyAbsentTeacher').value = '';
       document.getElementById('proxyClass').value = '';
       document.getElementById('proxyDivision').value = '';
       document.getElementById('assignProxyModal').classList.add('active');
@@ -1358,16 +1427,31 @@ max-width: 360px; width: 90%; text-align: center;
 
     window.confirmAssignProxy = async function() {
       if (!state.pendingProxy) return;
+      const absentTeacher = document.getElementById('proxyAbsentTeacher').value.trim();
       const classVal = document.getElementById('proxyClass').value.trim();
       const division = document.getElementById('proxyDivision').value.trim();
       
+      
+      if (!absentTeacher) return showToast('Please enter Absent Teacher name', 'warning');
       if (!classVal || !division) return showToast('Please enter Class and Division', 'warning');
       
       const today = getTodayStr();
       showLoading(true);
       try {
+        const hasSchedule = state.schedule.some(s => 
+          s.teacher === state.pendingProxy.teacher && 
+          s.day === state.pendingProxy.day && 
+          s.period === state.pendingProxy.period
+        );
+        if (hasSchedule) {
+          showToast('Teacher is no longer free', 'error');
+          showLoading(false);
+          return;
+        }
+        
         await setDoc(doc(collection(db, 'proxies')), {
           teacher: state.pendingProxy.teacher,
+          absentTeacher: absentTeacher,
           day: state.pendingProxy.day,
           period: state.pendingProxy.period,
           class: classVal,
@@ -1390,6 +1474,7 @@ max-width: 360px; width: 90%; text-align: center;
       showLoading(true);
       try {
         await deleteDoc(doc(db, 'proxies', proxyId));
+        state.proxies = state.proxies.filter(p => p.id !== proxyId);
         showToast('🗑️ Proxy removed');
         renderProxies();
         findAvailable();
@@ -1410,31 +1495,161 @@ max-width: 360px; width: 90%; text-align: center;
       if (noFreeTeachers) noFreeTeachers.classList.remove('show');
     };
 
+    // ✅ COMPLETELY REBUILT: Proxy table matching the exact image format
     function renderProxies() {
-      const allProxies = state.proxies;
-      const allList = document.getElementById('allProxiesList');
-      const noAll = document.getElementById('noProxies');
+      const todayProxies = state.proxies.filter(p => p.date === getTodayStr());
+      const proxyTableBody = document.getElementById('proxyTableBody');
+      const noProxies = document.getElementById('noProxies');
+      const proxyTableContainer = document.getElementById('proxyTableContainer');
       
-      if (!allList) return;
+      if (!proxyTableBody || !noProxies || !proxyTableContainer) return;
       
-      if (allProxies.length === 0) {
-        allList.innerHTML = '';
-        if (noAll) noAll.classList.add('show');
-      } else {
-        if (noAll) noAll.classList.remove('show');
-        allList.innerHTML = allProxies.map(p => `
-          <div class="proxy-list-card">
-            <div class="proxy-info">
-              <h4>👤 ${escapeHtml(p.teacher)}</h4>
-              <p>📅 ${escapeHtml(p.day)} • Period ${p.period} • Class ${escapeHtml(p.class)}${p.division ? '/' + escapeHtml(p.division) : ''} • ${escapeHtml(p.date)}</p>
-            </div>
-            <div class="proxy-actions">
-              <button class="btn btn-danger btn-sm" onclick="removeProxy('${escapeForAttr(p.id)}')" aria-label="Remove proxy">Remove</button>
-            </div>
-          </div>
-        `).join('');
+      if (todayProxies.length === 0) {
+        proxyTableContainer.style.display = 'none';
+        noProxies.classList.add('show');
+        return;
       }
+      
+      proxyTableContainer.style.display = 'block';
+      noProxies.classList.remove('show');
+      
+      // Group by absent teacher
+      const groupedByAbsent = {};
+      todayProxies.forEach(p => {
+        if (!groupedByAbsent[p.absentTeacher]) {
+          groupedByAbsent[p.absentTeacher] = [];
+        }
+        groupedByAbsent[p.absentTeacher].push(p);
+      });
+      
+      let html = '';
+      const absentNames = Object.keys(groupedByAbsent).sort();
+      
+      absentNames.forEach((absentTeacher, groupIndex) => {
+        const proxies = groupedByAbsent[absentTeacher];
+        
+        // Absent teacher header row (spans all columns)
+        html += `<tr class="absent-header-row">`;
+        html += `<td colspan="4">${escapeHtml(absentTeacher)}</td>`;
+        html += `</tr>`;
+        
+        // Each proxy row for this absent teacher
+        proxies.forEach(p => {
+          const classDisplay = p.class ? p.class + (p.division ? '/' + p.division : '') : '';
+          html += `<tr>`;
+          html += `<td class="lecture-no-col">${p.period}</td>`;
+          html += `<td class="class-col">${escapeHtml(classDisplay)}</td>`;
+          html += `<td class="teacher-col">${escapeHtml(p.teacher)}</td>`;
+          html += `<td class="sign-col"><button class="proxy-remove-btn" onclick="removeProxy('${escapeForAttr(p.id)}')" title="Remove">✕</button></td>`;
+          html += `</tr>`;
+        });
+        
+        // Empty row between groups (except after last)
+        if (groupIndex < absentNames.length - 1) {
+          html += `<tr class="empty-row"><td colspan="4">&nbsp;</td></tr>`;
+        }
+      });
+      
+      proxyTableBody.innerHTML = html;
     }
+
+    // ✅ NEW: Export Timetables as ZIP with PDFs (NO PROXY DATA)
+    window.exportTimetablesZIP = async function() {
+      if (state.teachers.length === 0) return showToast('No teachers to export', 'warning');
+      if (state.schedule.length === 0) return showToast('No schedule data to export', 'warning');
+      
+      showLoading(true);
+      showToast('📦 Generating timetables...', 'warning');
+      
+      try {
+        const { jsPDF } = window.jspdf;
+        const zip = new JSZip();
+        
+        for (const teacher of state.teachers) {
+          const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+          
+          doc.setFontSize(18);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Weekly Timetable - ${teacher.name}`, 14, 20);
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 28);
+          doc.text(`Periods: 1-${state.periodCount}`, 14, 33);
+          
+          const startY = 45;
+          const colWidth = 45;
+          const rowHeight = 15;
+          const daysList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+          
+          doc.setFillColor(99, 102, 241);
+          doc.setTextColor(255, 255, 255);
+          doc.setFont('helvetica', 'bold');
+          
+          doc.rect(14, startY - rowHeight, 25, rowHeight, 'F');
+          doc.text('Period', 26.5, startY - 7, { align: 'center' });
+          
+          daysList.forEach((day, i) => {
+            doc.rect(14 + 25 + (i * colWidth), startY - rowHeight, colWidth, rowHeight, 'F');
+            doc.text(day.substring(0, 3), 14 + 25 + (i * colWidth) + colWidth/2, startY - 7, { align: 'center' });
+          });
+          
+          doc.setTextColor(30, 41, 59);
+          doc.setFont('helvetica', 'normal');
+          
+          for (let period = 1; period <= state.periodCount; period++) {
+            const y = startY + ((period - 1) * rowHeight);
+            
+            doc.setFillColor(period % 2 === 0 ? 248 : 255, period % 2 === 0 ? 250 : 255, period % 2 === 0 ? 252 : 255);
+            doc.rect(14, y, 25, rowHeight, 'F');
+            doc.text(`${period}`, 26.5, y + rowHeight/2 + 3, { align: 'center' });
+            
+            daysList.forEach((day, i) => {
+              const x = 14 + 25 + (i * colWidth);
+              const entry = state.schedule.find(s => 
+                s.teacher === teacher.name && 
+                s.day === day && 
+                s.period === period
+              );
+              
+              doc.setFillColor(entry ? 240 : (period % 2 === 0 ? 248 : 255), 
+                              entry ? 253 : (period % 2 === 0 ? 250 : 255), 
+                              entry ? 244 : (period % 2 === 0 ? 252 : 255));
+              doc.rect(x, y, colWidth, rowHeight, 'F');
+              
+              if (entry) {
+                doc.setFont('helvetica', 'bold');
+                doc.text(entry.subject.substring(0, 15), x + colWidth/2, y + 6, { align: 'center' });
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Class: ${entry.class}`, x + colWidth/2, y + 11, { align: 'center' });
+              } else {
+                doc.setTextColor(100, 116, 139);
+                doc.text('—', x + colWidth/2, y + rowHeight/2 + 3, { align: 'center' });
+                doc.setTextColor(30, 41, 59);
+              }
+            });
+          }
+          
+          doc.setFontSize(8);
+          doc.setTextColor(100, 116, 139);
+          doc.text('Lecture Proxy Manager • Schedule Only (No Proxy Assignments)', 145, 290, { align: 'right' });
+          
+          const pdfBlob = doc.output('blob');
+          const safeName = teacher.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+          zip.file(`timetable_${safeName}.pdf`, pdfBlob);
+        }
+        
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        saveAs(zipBlob, `teacher_timetables_${getTodayStr()}.zip`);
+        
+        showToast(`✅ Exported ${state.teachers.length} timetables`);
+      } catch (e) {
+        console.error('Export error:', e);
+        showToast('Failed to export timetables', 'error');
+      } finally {
+        showLoading(false);
+      }
+    };
 
     window.closeConfirm = function() {
       const dialog = document.getElementById('confirmDialog');
@@ -1467,7 +1682,8 @@ max-width: 360px; width: 90%; text-align: center;
       show, addPeriod, removePeriod, openEdit, closeModal, saveCell, deleteCell,
       clearForm, saveTeacher, filterTeachers, loadTeacher, removeTeacher,
       updateViewTeacherDropdown, resetViewFilters, findAvailable, openAssignProxy,
-      closeAssignProxyModal, confirmAssignProxy, removeProxy, resetProxy, closeConfirm, showToast
+      closeAssignProxyModal, confirmAssignProxy, removeProxy, resetProxy, closeConfirm, 
+      showToast, exportTimetablesZIP
     });
 
     document.addEventListener('DOMContentLoaded', () => {
